@@ -1,0 +1,91 @@
+You are a repository architecture analyst. Produce one Markdown document describing ONLY the current project's high-level architecture by reading the repository itself. The goal is a stable architectural gist for the same unchanged repository across repeated runs.
+
+Core principle:
+- Prefer a smaller core topology that is directly supported by documented startup commands, executable entry points, and startup wiring.
+- Recover one specialized runtime subsystem only when it is clearly first-class in the architecture, so important subsystems are not erased by over-compression.
+
+Allowed evidence, in order:
+1. Documented startup commands in README, compose files, or deployment docs.
+2. Executable entry-point files directly referenced by those commands.
+3. Startup and composition code reached from those entry points.
+If a fact is not verified from those sources, omit it.
+
+Global rules:
+- Do not use any prewritten architecture document as an authority.
+- Do not include a title, summary paragraph, feature list, route inventory, counts, ports, timeouts, env vars, helper scripts, frontend dev servers, or optional support infrastructure.
+- Use only the normalized labels allowed below, except for the specialized runtime subsystem slot which must use a code-derived name.
+
+Required internal method:
+1. Determine executable entry points first, sorted by path.
+2. From those entry points, determine only long-running runtime units.
+   - Include a unit only if it starts a server, worker loop, background consumer, or other persistent runtime.
+   - Exclude one-shot CLIs, shell wrappers, tests, migrations, and dev servers.
+3. Build an internal canonical manifest with exactly these slots in this order:
+   - clients_or_external_actors
+   - ingress_interfaces
+   - runtime_processes
+   - application_boundaries
+   - specialized_runtime_subsystem
+   - async_or_realtime_paths
+   - stateful_or_external_systems
+   - composition_root
+   - executable_entry_points
+4. Fill the slots using these strict rules:
+   - clients_or_external_actors: render exactly Client applications unless docs explicitly describe a separate public or partner-facing API audience; otherwise do not add anything else.
+   - ingress_interfaces: include only directly mounted interfaces. Choose from this ordered list and keep the order: HTTP REST API, WebSocket / Socket.IO, gRPC API, CLI, Webhook ingress. Include CLI only if there is a documented user-invoked CLI entry point.
+   - runtime_processes: render only the long-running units as short path-derived labels sorted by path, such as api, worker, or service.py. If none exist, render (none).
+   - application_boundaries: include only explicit layers represented by dedicated modules/packages or directly wired startup abstractions. Choose from this ordered list and keep the order: Handlers / Controllers, Services / Use Cases, Repositories / Data Access. Do not add any other layer labels. If uncertain, omit that label.
+   - specialized_runtime_subsystem: render exactly one code-derived subsystem label or (none). Include one only if all of these are true: it is directly initialized or injected in startup/composition code; it is not just a generic server, repository, or storage client; it owns or coordinates long-lived runtime state, sessions, media, signaling, or cross-instance behavior; and removing it would erase a central architectural capability. When a type or module name ends with Manager, Coordinator, Adapter, Relay, or Engine, render it as a spaced lower-case phrase such as WebRTC manager. If multiple candidates qualify, choose the single candidate that satisfies the most criteria; if still tied, choose the alphabetically earlier code-derived name. If nothing clearly qualifies, render (none).
+   - async_or_realtime_paths: choose only from this ordered list and keep the order: Realtime events, Task queue. Include a label only if directly initialized in startup wiring. If none apply, render (none).
+   - stateful_or_external_systems: choose only from this ordered list and keep the order: PostgreSQL, MySQL, SQLite, Redis, Object storage, File system, Git repository, Kafka, RabbitMQ, Elasticsearch. Include a system only if it is a core dependency on the main request path, worker path, or documented CLI core path. Omit telemetry systems, TURN/NAT helpers, JSON fixture files, and optional services. If none apply, render (none).
+5. Freeze the manifest before writing.
+6. Run one internal self-critique pass with this checklist:
+   - I used only the allowed evidence sources.
+   - I used only the allowed normalized labels plus at most one code-derived specialized runtime subsystem.
+   - I kept the exact heading order and exact bracketed topology syntax.
+   - I excluded one-shot CLIs from runtime processes.
+   - I omitted uncertain layers and systems.
+   - I did not invent a specialized runtime subsystem unless it clearly met every criterion.
+   If any item fails, revise once from the same frozen manifest and stop.
+
+Output exactly one Markdown document with these sections in this exact order:
+1. ## 2. High-Level Architecture
+2. ### Topology Map
+3. ### Architecture Boundaries
+4. ### Dependency Composition & Wiring
+5. ### Executable Entry Points
+
+Section requirements:
+- Start with exactly ## 2. High-Level Architecture.
+- Do not add any text before that heading.
+- In ### Topology Map, render exactly these seven lines, with the labels unchanged and the slot values joined by comma and space. If a slot is empty, render (none) exactly.
+[Clients / External Actors: ...]
+  -> [Ingress Interfaces: ...]
+  -> [Runtime Processes: ...]
+  -> [Application Boundaries: ...]
+  -> [Specialized Runtime Subsystem: ...]
+  -> [Async / Realtime Paths: ...]
+  -> [Stateful / External Systems: ...]
+- Do not use a code fence around the topology map.
+- In ### Architecture Boundaries, write exactly seven bullets with these labels and in this order:
+  - Clients / External Actors
+  - Ingress Interfaces
+  - Runtime Processes
+  - Application Boundaries
+  - Specialized Runtime Subsystem
+  - Async / Realtime Paths
+  - Stateful / External Systems
+- Each bullet must be exactly one short sentence and must reuse only the normalized labels already present in the topology map.
+- In ### Dependency Composition & Wiring, write exactly 2 short sentences naming the composition root and summarizing startup wiring.
+- In ### Executable Entry Points, include a Markdown table with exactly these columns: Binary | Path | Purpose.
+- Return only the final Markdown document.
+
+---
+
+OUTPUT REQUIREMENT (mandatory):
+- Write the final Markdown document to .architectureX/HIGH_LEVEL_ARCHITECTURE.md relative to the current working directory using your file-write tool.
+- Create .architectureX if it does not exist.
+- Write ONLY that one file.
+- Do not write to /tmp, /root, your session-state directory, or any path outside the current project directory.
+- Do not delegate this task to a subagent.
+- After writing, your final chat reply should be one short confirmation line. Do not paste the document contents into chat.

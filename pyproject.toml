@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raw-docer"
+version = "2.0.0"
+description = "Raw architecture documentation generator powered by remote GitHub Copilot CLI"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.12.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+raw-docer = "raw_docer.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
