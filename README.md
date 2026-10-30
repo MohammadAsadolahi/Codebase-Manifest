@@ -40,6 +40,18 @@ The CLI syncs your repository to the remote machine, uses Copilot CLI to analyze
 
 **For coding agents:** Start with `01_GENERAL_ARCHITECTURE.md`, find the relevant feature in `FEATURE_CATALOG.md`, then follow its documented flows into the source code.
 
+## Agent skill (Claude Code, Codex, Gemini CLI)
+
+The same [portable Agent Skill](.agents/skills/codebase-manifest/SKILL.md) works across CLIs. Install it into a different repository:
+
+```bash
+python scripts/install_skill.py --target /path/to/repository --agent all
+```
+
+This installs complete copies under `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex and Gemini CLI). You can choose `--agent claude`, `codex`, or `gemini`. In Claude Code invoke `/codebase-manifest`; in Codex mention `$codebase-manifest`. The skill uses the active agent's filesystem tools; **no remote Copilot VM is required for this mode**.
+
+It generates the existing `.architectureY/` format. Selective `refresh` is guided by the agent; automatic incremental updates remain on the roadmap.
+
 ## Current status
 
 **Available now:** Full documentation generation with fixed-format prompts and feature-level analysis.
