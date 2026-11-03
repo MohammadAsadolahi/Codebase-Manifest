@@ -56,10 +56,12 @@ Follow [references/inspect-contract.md](references/inspect-contract.md). Answer 
 
 ## Validate and report
 
-When Python 3.10+ is available, run the packaged script:
+For `generate` and `refresh` only, when Python 3.10+ is available, run the packaged script:
 
 ```bash
 python "<skill-directory>/scripts/validate_docs.py" --root "<target-repository>"
 ```
 
-For overview-only docs add `--overview-only`. The script validates structure, catalog/detail identity, and existence of flow/model source paths; it **cannot prove semantic correctness**. Fix validation failures, then summarize changed files and remaining uncertainty. Do not claim checks were run unless they were.
+For overview-only docs add `--overview-only`. The script validates structure, catalog/detail identity, and existence of flow/model source paths; it **cannot prove semantic correctness**. Fix validation failures for generate/refresh, then summarize changed files and remaining uncertainty. Do not claim checks were run unless they were.
+
+For `inspect`, never run the docs validator or fix its failures: `.architectureY/` may not exist, and inspection must remain read-only. Report any verification limits in the response.
