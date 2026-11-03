@@ -1,6 +1,6 @@
 ---
 name: codebase-manifest
-description: Generate, navigate, or selectively refresh source-grounded, feature-first architecture documentation for a software repository. Use for codebase documentation, architecture maps, feature catalogs, execution-flow tracing, and updating Codebase-Manifest Markdown. Not for routine code editing without a documentation request.
+description: Generate, navigate, or selectively refresh source-grounded, feature-first architecture documentation for a software repository. Use for codebase documentation, feature catalogs, execution-flow tracing, task-scoped code navigation, and updating Codebase-Manifest Markdown. Not for making routine code edits.
 compatibility: Filesystem read/write access to the target repository. Python 3.10+ is optional for structural validation.
 ---
 
@@ -8,14 +8,14 @@ compatibility: Filesystem read/write access to the target repository. Python 3.1
 
 Build an **agent-readable map of a repository**: stable document shapes, features discovered from code, real file/symbol references, direct coupling, and persistence relationships. This is a portable [Agent Skills](https://agentskills.io/specification) workflow for Claude Code, Codex, Gemini CLI, and other compatible agents. It uses the **current agent's tools**; it does not need the project's remote Copilot runner.
 
-Read [references/output-contract.md](references/output-contract.md) before creating or editing docs. Relative references and scripts here resolve from **this skill directory**, not the target repository.
+Read [references/output-contract.md](references/output-contract.md) before creating or editing docs; for `inspect`, read [references/inspect-contract.md](references/inspect-contract.md). Relative references and scripts here resolve from **this skill directory**, not the target repository.
 
 ## Commands and scope
 
 - `generate`: document the repository from source.
 - `refresh <feature, paths, or change>`: selectively re-examine and update affected documents.
-- `inspect <topic>`: navigate existing documents and verify against source, without writing.
-- Without an explicit mode, choose generate for requests to create docs, refresh for requests to update docs, and inspect for read-only questions. Don't trigger merely because the user is modifying code.
+- `inspect <task or topic>`: identify relevant source, trace verified behavior, and return a compact reading order without writing.
+- Without an explicit mode, choose generate for requests to create docs, refresh for requests to update docs, and inspect for read-only navigation questions. Don't trigger merely because the user is modifying code.
 
 Use the user's requested target repository, otherwise the repository containing the current working directory. Identify its root (e.g. `git rev-parse --show-toplevel`). If the root or required files cannot be accessed, explain rather than guessing.
 
@@ -45,9 +45,14 @@ Use the user's requested target repository, otherwise the repository containing 
 
 This refresh is performed by the agent; it is **not** a persistent Git-impact engine or guaranteed deterministic incremental updater.
 
-## Inspect — read only
+## Inspect — task-scoped, read only
 
-Start with `01_GENERAL_ARCHITECTURE.md`, locate a feature through `FEATURE_CATALOG.md`, then open that feature document and verify relevant claims in source. Do not change files.
+Follow [references/inspect-contract.md](references/inspect-contract.md). Answer the task or question directly, not with an exhaustive repository summary.
+
+1. Use `.architectureY/FEATURE_CATALOG.md` and relevant feature docs as navigation hints when available. If documentation is absent, inspect source directly; do not generate docs as a prerequisite.
+2. Search for the task's entry point, follow only the calls needed to establish behavior, and verify each reported path and symbol against current source. Include relevant tests and direct dependencies when found.
+3. Return a short, prioritized source reading order, the verified execution flow, and any uncertainties. Distinguish confirmed behavior from places that still need inspection.
+4. Do not write files, execute project code, install packages, use network services, or invoke the remote runner.
 
 ## Validate and report
 
