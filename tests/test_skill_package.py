@@ -28,6 +28,8 @@ class SkillTests(unittest.TestCase):
         self.assertTrue(text.startswith("---\nname: codebase-manifest\n"))
         self.assertIn("description:", text.split("---", 2)[1])
         self.assertTrue((installer.SOURCE / "references/output-contract.md").exists())
+        self.assertTrue((installer.SOURCE / "references/inspect-contract.md").exists())
+        self.assertIn("references/inspect-contract.md", text)
 
     def test_install_copy_for_all_agents(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -38,6 +40,13 @@ class SkillTests(unittest.TestCase):
                 (root / ".claude/skills/codebase-manifest/SKILL.md").read_bytes(),
                 (root / ".agents/skills/codebase-manifest/SKILL.md").read_bytes(),
             )
+            for relative in ("references/output-contract.md", "references/inspect-contract.md"):
+                expected = (installer.SOURCE / relative).read_bytes()
+                for base in (".claude/skills", ".agents/skills"):
+                    self.assertEqual(
+                        (root / base / "codebase-manifest" / relative).read_bytes(),
+                        expected,
+                    )
             with self.assertRaises(ValueError):
                 installer.install(root, "all")
             installer.install(root, "all", force=True)

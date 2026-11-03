@@ -22,39 +22,40 @@ Unlike a repository-to-text dump, it focuses on navigable architecture and code-
 └── NN_<Feature_Key>.md       # One deep dive per feature
 ```
 
-## Quick start
+## Quick start — Agent Skill (Claude Code, Codex, Gemini CLI)
 
-**Requirements:** Python 3.10+, SSH and rsync, and an authenticated GitHub Copilot CLI on a remote machine.
+The [portable Agent Skill](.agents/skills/codebase-manifest/SKILL.md) uses your active agent's filesystem tools; **no remote Copilot VM is required**.
 
 ```bash
 git clone https://github.com/MohammadAsadolahi/Codebase-Manifest.git
 cd Codebase-Manifest
-python -m pip install -e .
+python scripts/install_skill.py --target /path/to/repository --agent all
+```
 
+This installs complete copies under `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex and Gemini CLI). Use `--agent claude`, `codex`, or `gemini` for a single target. In Claude Code invoke `/codebase-manifest`; in Codex mention `$codebase-manifest`.
+
+**Inspect a task (read-only):** Ask your agent to use Codebase-Manifest to `inspect where login failures are handled`. It returns a focused reading order and verified source flow, without generating docs or changing code. Existing `.architectureY/` docs are optional for inspection.
+
+**Generate or refresh:** Ask your agent to `generate` the architecture docs, or `refresh` a named feature. Generation writes the structure above; refresh is guided by the agent, not automatic incremental tracking.
+
+## Remote CLI (optional)
+
+**Requirements:** Python 3.10+, SSH and rsync, and an authenticated GitHub Copilot CLI on a trusted, isolated remote machine.
+
+```bash
+python -m pip install -e .
 export DOCER_SSH_HOST="user@your-vm"
 export DOCER_REMOTE_WORKDIR="/home/user/docer_work"
 raw-docer generate /path/to/your/repository
 ```
 
-The CLI syncs your repository to the remote machine, uses Copilot CLI to analyze it, and downloads the generated documentation. Use `--skip-features` for overview docs only, or `raw-docer generate --help` for all options.
+The CLI uploads the repository, uses remote Copilot to analyze it, and downloads the documents. Use `--skip-features` for overview docs only. The remote runner is less restricted than the portable skill; review the security warning below before using it.
 
-**For coding agents:** Start with `01_GENERAL_ARCHITECTURE.md`, find the relevant feature in `FEATURE_CATALOG.md`, then follow its documented flows into the source code.
-
-## Agent skill (Claude Code, Codex, Gemini CLI)
-
-The same [portable Agent Skill](.agents/skills/codebase-manifest/SKILL.md) works across CLIs. Install it into a different repository:
-
-```bash
-python scripts/install_skill.py --target /path/to/repository --agent all
-```
-
-This installs complete copies under `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex and Gemini CLI). You can choose `--agent claude`, `codex`, or `gemini`. In Claude Code invoke `/codebase-manifest`; in Codex mention `$codebase-manifest`. The skill uses the active agent's filesystem tools; **no remote Copilot VM is required for this mode**.
-
-It generates the existing `.architectureY/` format. Selective `refresh` is guided by the agent; automatic incremental updates remain on the roadmap.
+**For coding agents:** Start with `01_GENERAL_ARCHITECTURE.md`, find the feature in `FEATURE_CATALOG.md`, then verify documented flows against the source.
 
 ## Current status
 
-**Available now:** Full documentation generation with fixed-format prompts and feature-level analysis.
+**Available now:** Feature-level documentation generation, guided selective refresh, and read-only task-scoped source inspection via the portable skill.
 
 **Next:** Stable feature identities, machine-validated document schemas, and **incremental updates** that regenerate only affected sections. These are planned—not implemented yet. Current runs regenerate the documentation, and feature names or numbers may change.
 
