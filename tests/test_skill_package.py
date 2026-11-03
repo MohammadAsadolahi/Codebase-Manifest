@@ -31,6 +31,15 @@ class SkillTests(unittest.TestCase):
         self.assertTrue((installer.SOURCE / "references/inspect-contract.md").exists())
         self.assertIn("references/inspect-contract.md", text)
 
+    def test_inspect_does_not_require_generated_docs(self):
+        skill = (installer.SOURCE / "SKILL.md").read_text(encoding="utf-8")
+        contract = (installer.SOURCE / "references/inspect-contract.md").read_text(encoding="utf-8")
+        self.assertIn("If documentation is absent, inspect source directly", skill)
+        self.assertIn("For `inspect`, never run the docs validator", skill)
+        self.assertIn("do not create or update `.architectureY/` documents", contract)
+        with tempfile.TemporaryDirectory() as temp:
+            self.assertIn("Missing or unsafe .architectureY/ directory", validate.check(Path(temp)))
+
     def test_install_copy_for_all_agents(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
